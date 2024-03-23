@@ -4,13 +4,14 @@ import torch
 from torchmetrics import Accuracy
 
 class LitModel(pl.LightningModule):
-    def __init__(self, model: torch.nn.Module, num_classes, lr=1e-3):
+    def __init__(self, model: torch.nn.Module, weight: list, num_classes, lr=1e-3):
         super().__init__()
         self.save_hyperparameters(ignore=['model'])
         self.model = model
         self.train_acc = Accuracy(task="multiclass", num_classes=num_classes)
         self.val_acc = Accuracy(task="multiclass", num_classes=num_classes)
-        self.loss_fn = torch.nn.CrossEntropyLoss()
+        self.loss_fn = torch.nn.CrossEntropyLoss(weight=weight)
+        self.lr = lr
 
     def forward(self, x):
         return self.model(x)
@@ -42,5 +43,5 @@ class LitModel(pl.LightningModule):
         # print(f"val_loss: {loss}, val_acc: {acc}")
 
     def configure_optimizers(self):
-        optimizer = torch.optim.SGD(self.parameters(), lr=self.hparams.lr, momentum=0.9)
+        optimizer = torch.optim.SGD(self.parameters(), lr=self.lr, momentum=0.9)
         return optimizer

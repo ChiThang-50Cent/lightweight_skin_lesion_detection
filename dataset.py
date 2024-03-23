@@ -11,6 +11,7 @@ class HAM10000_Dataset(Dataset):
     def __init__(self, csv_file, root_dir, transform=None) -> None:
 
         self.df, self.label_encoder = self.metadata_process(csv_file)
+        self.class_weight = self.caculate_weight()
         self.root_dir = root_dir
         self.transform = transform
 
@@ -38,9 +39,19 @@ class HAM10000_Dataset(Dataset):
 
         df['encoded_dx'] = le.transform(df['dx'])
 
-        df.to_csv('./temp.csv')
-
         return df, le
+    
+    def caculate_weight(self):
+        num_of_record = len(self.df)
+        weight = []
+        list_classes = sorted(self.df['encoded_dx'].unique())
+
+        for class_ in list_classes:
+            scale = num_of_record / len(self.df[self.df['encoded_dx'] == class_])
+
+            weight.append(scale)
+
+        return weight
 
 class HAM10000_DataLoader():
     def __init__(self, dataset, batch_size=32, validation_split=0.2, shuffer=True) -> None:

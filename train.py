@@ -5,7 +5,6 @@ import albumentations as album
 import pytorch_lightning as pl
 
 from lightning_train import LitModel
-from mobileViT import mobilevit_xxs
 
 from albumentations.pytorch import ToTensorV2
 from dataset import HAM10000_Dataset, HAM10000_DataLoader
@@ -28,12 +27,14 @@ def get_transform(size):
 
     return train_transform
 
-
-def get_data_loader(csv_file, root_dir, batch_size, train_transform, validation_split=0.1):
+def get_dataset(csv_file, root_dir, train_transform):
     full_dataset = HAM10000_Dataset(csv_file, root_dir, train_transform)
 
+    return full_dataset
+
+def get_data_loader(dataset, batch_size, validation_split=0.1):
     dataloader = HAM10000_DataLoader(
-        dataset=full_dataset, batch_size=batch_size, validation_split=validation_split
+        dataset=dataset, batch_size=batch_size, validation_split=validation_split
     )
 
     train_loader = dataloader.get_train_loader()
@@ -72,15 +73,12 @@ if __name__ == "__main__":
     parser.add_argument("--img_size", type=int, default=256)
     args = parser.parse_args()
 
-    model = choose_model(args.model_name, args.num_classes)
-
-    lit_model = LitModel(model=model, num_classes=args.num_classes, lr=args.lr)
-
     train_transfrom = get_transform(args.img_size)
+    dataset = get_dataset(args.csv_file, args.root_dir, train_transfrom)
+    train_loader, val_loader = get_data_loader(dataset, args.batch_size)
 
-    train_loader, val_loader = get_data_loader(
-        args.csv_file, args.root_dir, args.batch_size, train_transfrom
-    )
+    model = choose_model(args.model_name, args.num_classes)
+    lit_model = LitModel(model=model, weight=dataset.class_weight, num_classes=args.num_classes, lr=args.lr)
 
     checkpoint_callback = ModelCheckpoint(
         "./saved_model",
