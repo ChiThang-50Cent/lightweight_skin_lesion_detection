@@ -1,6 +1,5 @@
 import torch
 import argparse
-import torchvision
 import albumentations as album
 import pytorch_lightning as pl
 
@@ -10,6 +9,7 @@ from pytorch_lightning.loggers import CSVLogger
 from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
 
 from torchvision.transforms import v2, ToTensor
+
 
 def get_augment_transform(size):
 
@@ -26,12 +26,15 @@ def get_augment_transform(size):
 
     return transform
 
+
 def get_torch_transform():
-    
-    transform = v2.Compose([
-        ToTensor(),
-        v2.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-    ])
+
+    transform = v2.Compose(
+        [
+            ToTensor(),
+            v2.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+        ]
+    )
 
     return transform
 
@@ -40,6 +43,7 @@ def get_dataset(csv_file, root_dir, train_transform):
     full_dataset = HAM10000_Dataset(csv_file, root_dir, train_transform)
 
     return full_dataset
+
 
 def get_data_loader(dataset, batch_size, validation_split=0.1):
     dataloader = HAM10000_DataLoader(
@@ -50,20 +54,6 @@ def get_data_loader(dataset, batch_size, validation_split=0.1):
     val_loader = dataloader.get_val_loader()
 
     return train_loader, val_loader
-
-
-def choose_model(model_name, num_classes):
-    model = None
-
-    if model_name == "efficientnet":
-        model = torchvision.models.efficientnet_v2_s(num_classes=num_classes)
-    elif model_name == "mobilenetv3":
-        model = torchvision.models.mobilenet_v3_large(num_classes=num_classes)
-    elif model_name == "shufflenet":
-        model = torchvision.models.shufflenet_v2_x2_0(num_classes=num_classes)
-
-    return model
-
 
 if __name__ == "__main__":
 
@@ -77,6 +67,7 @@ if __name__ == "__main__":
     parser.add_argument("--csv_file", help="Path to csv file")
     parser.add_argument("--root_dir", help="Root dir of images folder")
     parser.add_argument("--weight", type=bool)
+    parser.add_argument("--pre_trained", type=bool, default=True)
     parser.add_argument("--lr", type=float, default=1e-3)
     parser.add_argument("--batch_size", type=int, default=64)
     parser.add_argument("--epochs", type=int, default=50)
@@ -85,15 +76,22 @@ if __name__ == "__main__":
 
     album_transform = get_augment_transform(args.img_size)
     torch_transform = get_torch_transform()
-    dataset = get_dataset(args.csv_file, args.root_dir, (album_transform, torch_transform))
+    dataset = get_dataset(
+        args.csv_file, args.root_dir, (album_transform, torch_transform)
+    )
     train_loader, val_loader = get_data_loader(dataset, args.batch_size)
 
-    model = choose_model(args.model_name, args.num_classes)
-    
     weight = None
     if args.weight:
         weight = dataset.class_weight
-    lit_model = LitModel(model=model, weight=weight, num_classes=args.num_classes, lr=args.lr)
+    
+    lit_model = LitModel(
+        model_name=args.model_name,
+        weight=weight,
+        num_classes=args.num_classes,
+        lr=args.lr,
+        pre_trained=args.pre_trained
+    )
 
     checkpoint_callback = ModelCheckpoint(
         "./saved_model",
@@ -107,10 +105,7 @@ if __name__ == "__main__":
         accelerator="auto",
         devices="auto",
         logger=CSVLogger("./log", name=f"{args.model_name}_logs"),
-        callbacks=[
-            EarlyStopping("val_loss", patience=7),
-            checkpoint_callback
-        ],
+        callbacks=[EarlyStopping("val_loss", patience=7), checkpoint_callback],
     )
 
     trainer.fit(lit_model, train_loader, val_loader)
