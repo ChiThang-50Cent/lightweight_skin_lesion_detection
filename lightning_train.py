@@ -8,8 +8,8 @@ class LitModel(pl.LightningModule):
         super().__init__()
         self.save_hyperparameters(ignore=['model'])
         self.model = model
-        self.train_acc = Accuracy(task="multiclass", num_classes=num_classes)
-        self.val_acc = Accuracy(task="multiclass", num_classes=num_classes)
+        self.train_acc = Accuracy(task="multiclass", num_classes=num_classes, average='weighted')
+        self.val_acc = Accuracy(task="multiclass", num_classes=num_classes, average='weighted')
         self.loss_fn = torch.nn.CrossEntropyLoss(weight=weight)
         self.lr = lr
 
