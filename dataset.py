@@ -58,7 +58,7 @@ class HAM10000_DataLoader():
             np.random.seed(random_seed)
             np.random.shuffle(indices)
 
-        train_indices, val_indices = indices[:split], indices[split:]
+        train_indices, val_indices = indices[split:], indices[:split]
         
         self.train_sampler = SubsetRandomSampler(train_indices)
         self.val_sampler = SubsetRandomSampler(val_indices)

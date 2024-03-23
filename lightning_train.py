@@ -33,9 +33,9 @@ class LitModel(pl.LightningModule):
 
         logits = self(x)
         loss = self.loss_fn(logits, y)
-        self.log("val_loss", loss)
+        self.log("val_loss", loss, sync_dist=True)
         acc = self.val_acc(logits, y)
-        self.log("val_acc", acc) 
+        self.log("val_acc", acc, sync_dist=True) 
 
     def configure_optimizers(self):
         optimizer = torch.optim.SGD(self.parameters(), lr=self.hparams.lr, momentum=0.9)
