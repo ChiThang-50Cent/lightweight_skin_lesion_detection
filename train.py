@@ -21,6 +21,7 @@ def get_transform(size):
             ),
             album.RGBShift(r_shift_limit=15, g_shift_limit=15, b_shift_limit=15, p=0.5),
             album.RandomBrightnessContrast(p=0.5),
+            album.Normalize(),
             ToTensorV2(),
         ]
     )

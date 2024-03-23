@@ -48,8 +48,7 @@ class HAM10000_Dataset(Dataset):
         list_classes = sorted(self.df['encoded_dx'].unique())
 
         for class_ in list_classes:
-            scale = num_of_record / len(self.df[self.df['encoded_dx'] == class_])
-
+            scale = 1 - (len(self.df[self.df['encoded_dx'] == class_]) / num_of_record)
             weight.append(scale)
 
         return torch.FloatTensor(weight)
