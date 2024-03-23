@@ -17,6 +17,8 @@ class LitModel(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         x, y = batch
+        x = torch.FloatTensor(x)
+
         logits = self(x)
         loss = self.loss_fn(logits, y)
         self.log("train_loss", loss)
@@ -27,6 +29,8 @@ class LitModel(pl.LightningModule):
     
     def validation_step(self, batch, batch_idx):
         x, y = batch
+        x = torch.FloatTensor(x)
+
         logits = self(x)
         loss = self.loss_fn(logits, y)
         self.log("val_loss", loss)

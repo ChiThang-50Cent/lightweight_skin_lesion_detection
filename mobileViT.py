@@ -242,17 +242,19 @@ def count_parameters(model):
 if __name__ == '__main__':
     img = torch.randn(5, 3, 256, 256)
 
-    vit = mobilevit_xxs()
-    out = vit(img)
-    print(out.shape)
-    print(count_parameters(vit))
+    print(img.type())
 
-    vit = mobilevit_xs()
-    out = vit(img)
-    print(out.shape)
-    print(count_parameters(vit))
+    # vit = mobilevit_xxs()
+    # out = vit(img)
+    # print(out.shape)
+    # print(count_parameters(vit))
 
-    vit = mobilevit_s()
-    out = vit(img)
-    print(out.shape)
-    print(count_parameters(vit))
+    # vit = mobilevit_xs()
+    # out = vit(img)
+    # print(out.shape)
+    # print(count_parameters(vit))
+
+    # vit = mobilevit_s()
+    # out = vit(img)
+    # print(out.shape)
+    # print(count_parameters(vit))
