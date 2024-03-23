@@ -86,7 +86,7 @@ if __name__ == "__main__":
         "./saved_model",
         monitor="val_loss",
         save_top_k=1,
-        filename=args + "_{epoch:02d}_{val_loss:.2f}",
+        filename=args.model_name + "_{epoch:02d}_{val_loss:.2f}",
     )
 
     trainer = pl.Trainer(
