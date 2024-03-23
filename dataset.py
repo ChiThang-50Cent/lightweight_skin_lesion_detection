@@ -26,7 +26,7 @@ class HAM10000_Dataset(Dataset):
         label = self.df['encoded_dx'][index]
 
         if self.transform:
-            img = self.transform(img)
+            img = self.transform(image=img)["image"]
 
         return img, label 
 
