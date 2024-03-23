@@ -5,15 +5,15 @@ import albumentations as album
 import pytorch_lightning as pl
 
 from lightning_train import LitModel
-
-from albumentations.pytorch import ToTensorV2
 from dataset import HAM10000_Dataset, HAM10000_DataLoader
 from pytorch_lightning.loggers import CSVLogger
 from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
 
-def get_transform(size):
+from torchvision.transforms import v2, ToTensor
 
-    train_transform = album.Compose(
+def get_augment_transform(size):
+
+    transform = album.Compose(
         [
             album.SmallestMaxSize(max_size=size),
             album.ShiftScaleRotate(
@@ -21,12 +21,20 @@ def get_transform(size):
             ),
             album.RGBShift(r_shift_limit=15, g_shift_limit=15, b_shift_limit=15, p=0.5),
             album.RandomBrightnessContrast(p=0.5),
-            album.Normalize(),
-            ToTensorV2(),
         ]
     )
 
-    return train_transform
+    return transform
+
+def get_torch_transform():
+    
+    transform = v2.Compose([
+        ToTensor(),
+        v2.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+    ])
+
+    return transform
+
 
 def get_dataset(csv_file, root_dir, train_transform):
     full_dataset = HAM10000_Dataset(csv_file, root_dir, train_transform)
@@ -75,8 +83,9 @@ if __name__ == "__main__":
     parser.add_argument("--img_size", type=int, default=256)
     args = parser.parse_args()
 
-    train_transfrom = get_transform(args.img_size)
-    dataset = get_dataset(args.csv_file, args.root_dir, train_transfrom)
+    album_transform = get_augment_transform(args.img_size)
+    torch_transform = get_torch_transform()
+    dataset = get_dataset(args.csv_file, args.root_dir, (album_transform, torch_transform))
     train_loader, val_loader = get_data_loader(dataset, args.batch_size)
 
     model = choose_model(args.model_name, args.num_classes)
