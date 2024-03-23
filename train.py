@@ -76,6 +76,8 @@ if __name__ == "__main__":
     else:
         model = model(num_classes=args.num_classes)
 
+    print(model)
+
     lit_model = LitModel(model=model, num_classes=args.num_classes, lr=args.lr)
 
     train_loader, val_loader = get_data_loader(
