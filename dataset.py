@@ -38,6 +38,8 @@ class HAM10000_Dataset(Dataset):
 
         df['encoded_dx'] = le.transform(df['dx'])
 
+        df.to_csv('./temp.csv')
+
         return df, le
 
 class HAM10000_DataLoader():
