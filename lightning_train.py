@@ -4,7 +4,7 @@ import torch
 from torchmetrics import Accuracy
 
 class LitModel(pl.LightningModule):
-    def __init__(self, model: torch.nn.Module, weight: list, num_classes, lr=1e-3):
+    def __init__(self, model: torch.nn.Module, num_classes, weight: torch.Tensor | None = None, lr=1e-3):
         super().__init__()
         self.save_hyperparameters(ignore=['model'])
         self.model = model

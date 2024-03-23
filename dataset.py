@@ -52,7 +52,7 @@ class HAM10000_Dataset(Dataset):
 
             weight.append(scale)
 
-        return weight
+        return torch.FloatTensor(weight)
 
 class HAM10000_DataLoader():
     def __init__(self, dataset, batch_size=32, validation_split=0.2, shuffer=True) -> None:
