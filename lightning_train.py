@@ -69,7 +69,7 @@ class LitModel(pl.LightningModule):
         optimizer = torch.optim.Adam(self.parameters(), lr=self.lr)
         return optimizer
 
-    def choose_model(model_name, pre_trained) -> torch.nn.Module:
+    def choose_model(self, model_name, pre_trained) -> torch.nn.Module:
         model = None
 
         if model_name == "efficientnet":
