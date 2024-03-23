@@ -47,6 +47,8 @@ class HAM10000_DataLoader():
         self.validation_split = validation_split
         self.shuffer = shuffer
 
+        self.create_dataloader()
+
     def create_dataloader(self, random_seed=42):
         dataset_size = len(self.dataset)
         indices = list(range(dataset_size))
