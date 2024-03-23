@@ -68,6 +68,7 @@ if __name__ == "__main__":
     )
     parser.add_argument("--csv_file", help="Path to csv file")
     parser.add_argument("--root_dir", help="Root dir of images folder")
+    parser.add_argument("--weight", type=bool)
     parser.add_argument("--lr", type=float, default=1e-3)
     parser.add_argument("--batch_size", type=int, default=64)
     parser.add_argument("--epochs", type=int, default=50)
@@ -79,7 +80,11 @@ if __name__ == "__main__":
     train_loader, val_loader = get_data_loader(dataset, args.batch_size)
 
     model = choose_model(args.model_name, args.num_classes)
-    lit_model = LitModel(model=model, weight=dataset.class_weight, num_classes=args.num_classes, lr=args.lr)
+    
+    weight = None
+    if args.weight:
+        weight = dataset.class_weight
+    lit_model = LitModel(model=model, weight=weight, num_classes=args.num_classes, lr=args.lr)
 
     checkpoint_callback = ModelCheckpoint(
         "./saved_model",
