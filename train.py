@@ -12,20 +12,24 @@ from dataset import HAM10000_Dataset, HAM10000_DataLoader
 from pytorch_lightning.loggers import CSVLogger
 from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
 
-train_transform = album.Compose(
-    [
-        album.SmallestMaxSize(max_size=256),
-        album.ShiftScaleRotate(
-            shift_limit=0.05, scale_limit=0.05, rotate_limit=90, p=0.75
-        ),
-        album.RGBShift(r_shift_limit=15, g_shift_limit=15, b_shift_limit=15, p=0.5),
-        album.RandomBrightnessContrast(p=0.5),
-        ToTensorV2(),
-    ]
-)
+def get_transform(size):
+
+    train_transform = album.Compose(
+        [
+            album.SmallestMaxSize(max_size=size),
+            album.ShiftScaleRotate(
+                shift_limit=0.05, scale_limit=0.05, rotate_limit=90, p=0.75
+            ),
+            album.RGBShift(r_shift_limit=15, g_shift_limit=15, b_shift_limit=15, p=0.5),
+            album.RandomBrightnessContrast(p=0.5),
+            ToTensorV2(),
+        ]
+    )
+
+    return train_transform
 
 
-def get_data_loader(csv_file, root_dir, batch_size, validation_split=0.1):
+def get_data_loader(csv_file, root_dir, batch_size, train_transform, validation_split=0.1):
     full_dataset = HAM10000_Dataset(csv_file, root_dir, train_transform)
 
     dataloader = HAM10000_DataLoader(
@@ -38,17 +42,15 @@ def get_data_loader(csv_file, root_dir, batch_size, validation_split=0.1):
     return train_loader, val_loader
 
 
-def choose_model(model_name):
+def choose_model(model_name, num_classes):
     model = None
 
     if model_name == "efficientnet":
-        model = torchvision.models.efficientnet_v2_s
+        model = torchvision.models.efficientnet_v2_s(num_classes=num_classes)
     elif model_name == "mobilenetv3":
-        model = torchvision.models.mobilenet_v3_large
+        model = torchvision.models.mobilenet_v3_large(num_classes=num_classes)
     elif model_name == "shufflenet":
-        model = torchvision.models.shufflenet_v2_x2_0
-    elif model_name == "mobilevit":
-        model = mobilevit_xxs
+        model = torchvision.models.shufflenet_v2_x2_0(num_classes=num_classes)
 
     return model
 
@@ -67,19 +69,17 @@ if __name__ == "__main__":
     parser.add_argument("--lr", type=float, default=1e-3)
     parser.add_argument("--batch_size", type=int, default=64)
     parser.add_argument("--epochs", type=int, default=50)
+    parser.add_argument("--img_size", type=int, default=256)
     args = parser.parse_args()
 
-    model = choose_model(args.model_name)
-
-    if args.model_name == "mobilevit":
-        model = model(image_size=(256, 256), num_classes=args.num_classes)
-    else:
-        model = model(num_classes=args.num_classes)
+    model = choose_model(args.model_name, args.num_classes)
 
     lit_model = LitModel(model=model, num_classes=args.num_classes, lr=args.lr)
 
+    train_transfrom = get_transform(args.img_size)
+
     train_loader, val_loader = get_data_loader(
-        args.csv_file, args.root_dir, args.batch_size
+        args.csv_file, args.root_dir, args.batch_size, train_transfrom
     )
 
     checkpoint_callback = ModelCheckpoint(
