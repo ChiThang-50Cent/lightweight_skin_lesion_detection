@@ -1,0 +1,5 @@
+venv
+
+log/*
+
+saved_model/*
