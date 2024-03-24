@@ -53,6 +53,6 @@ class Init_dataframe:
         data_aug_rate = [15,10,5,50,0,40,5]
         for i in range(7):
             if data_aug_rate[i]:
-                df_train=df_train.append([df_train.loc[df_train['encoded_dx'] == i,:]]*(data_aug_rate[i]-1), ignore_index=True)
+                df_train= pd.concat([df_train.loc[df_train['encoded_dx'] == i,:]]*(data_aug_rate[i]-1), ignore_index=True)
         
         return df_train
