@@ -1,4 +1,5 @@
 import os
+import torch
 
 from PIL import Image
 from torch.utils.data import Dataset
@@ -18,7 +19,7 @@ class Custom_Dataset(Dataset):
         img_path = os.path.join(self.root_dir, f"{self.df['image_id'][index]}.{'jpg'}")
         img = Image.open(img_path)
 
-        label = self.df["encoded_dx"][index]
+        label = torch.tensor(int(self.df["encoded_dx"][index]))
 
         if self.transform:
             img = self.transform(img)
