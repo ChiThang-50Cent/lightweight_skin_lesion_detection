@@ -56,6 +56,7 @@ if __name__ == "__main__":
 
     lit_model = LitModel(
         model=model,
+        num_classes=args.num_classes,
         lr=args.lr,
     )
 
