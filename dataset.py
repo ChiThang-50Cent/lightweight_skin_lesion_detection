@@ -1,10 +1,10 @@
 import os
-import numpy as np
 
 from PIL import Image
 from torch.utils.data import Dataset
 
-class HAM10000_Dataset(Dataset):
+
+class Custom_Dataset(Dataset):
     def __init__(self, df, root_dir, transform=None) -> None:
         self.df = df
         self.root_dir = root_dir
@@ -17,7 +17,6 @@ class HAM10000_Dataset(Dataset):
 
         img_path = os.path.join(self.root_dir, f"{self.df['image_id'][index]}.{'jpg'}")
         img = Image.open(img_path)
-        img = np.array(img)
 
         label = self.df["encoded_dx"][index]
 

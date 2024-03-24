@@ -1,59 +1,17 @@
-import torch
 import argparse
-import albumentations as album
 import pytorch_lightning as pl
 
+from torch.utils.data import DataLoader
+
 from lightning_train import LitModel
-from dataset import HAM10000_Dataset, HAM10000_DataLoader
 from pytorch_lightning.loggers import CSVLogger
 from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
 
-from torchvision.transforms import v2, ToTensor
+from dataframe import Init_dataframe
+from dataset import Custom_Dataset
+from transforms import get_val_transform, get_train_transform
+from models import Models
 
-
-def get_augment_transform(size):
-
-    transform = album.Compose(
-        [
-            album.SmallestMaxSize(max_size=size),
-            album.ShiftScaleRotate(
-                shift_limit=0.05, scale_limit=0.05, rotate_limit=90, p=0.75
-            ),
-            album.RGBShift(r_shift_limit=15, g_shift_limit=15, b_shift_limit=15, p=0.5),
-            album.RandomBrightnessContrast(p=0.5),
-        ]
-    )
-
-    return transform
-
-
-def get_torch_transform():
-
-    transform = v2.Compose(
-        [
-            ToTensor(),
-            v2.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-        ]
-    )
-
-    return transform
-
-
-def get_dataset(csv_file, root_dir, train_transform):
-    full_dataset = HAM10000_Dataset(csv_file, root_dir, train_transform)
-
-    return full_dataset
-
-
-def get_data_loader(dataset, batch_size, validation_split=0.1):
-    dataloader = HAM10000_DataLoader(
-        dataset=dataset, batch_size=batch_size, validation_split=validation_split
-    )
-
-    train_loader = dataloader.get_train_loader()
-    val_loader = dataloader.get_val_loader()
-
-    return train_loader, val_loader
 
 if __name__ == "__main__":
 
@@ -61,12 +19,11 @@ if __name__ == "__main__":
     parser.add_argument("--num_classes", "-n", type=int, help="Number of classes")
     parser.add_argument(
         "--model_name",
-        help="Choose model efficientnet, mobilenetv3, shufflenet or mobilevit",
-        default="mobilevit",
+        help="Choose model efficientnet, mobilenetv3, shufflenetv2",
+        default="mobilenetv3",
     )
     parser.add_argument("--csv_file", help="Path to csv file")
     parser.add_argument("--root_dir", help="Root dir of images folder")
-    parser.add_argument("--weight", type=bool)
     parser.add_argument("--pre_trained", type=bool, default=True)
     parser.add_argument("--lr", type=float, default=1e-3)
     parser.add_argument("--batch_size", type=int, default=64)
@@ -74,23 +31,32 @@ if __name__ == "__main__":
     parser.add_argument("--img_size", type=int, default=256)
     args = parser.parse_args()
 
-    album_transform = get_augment_transform(args.img_size)
-    torch_transform = get_torch_transform()
-    dataset = get_dataset(
-        args.csv_file, args.root_dir, (album_transform, torch_transform)
-    )
-    train_loader, val_loader = get_data_loader(dataset, args.batch_size)
+    df = Init_dataframe(args.csv_file)
 
-    weight = None
-    if args.weight:
-        weight = dataset.class_weight
-    
-    lit_model = LitModel(
+    train_transform = get_train_transform(args.img_size)
+    train_set = Custom_Dataset(
+        df.df_train, root_dir=args.root_dir, transform=train_transform
+    )
+    train_loader = DataLoader(
+        train_set, batch_size=args.batch_size, shuffle=True, num_workers=4
+    )
+
+    val_transform = get_val_transform(args.img_size)
+    val_set = Custom_Dataset(df.df_val, root_dir=args.root_dir, transform=val_transform)
+    val_loader = DataLoader(
+        val_set, batch_size=args.batch_size, shuffle=False, num_workers=4
+    )
+
+    model = Models(
         model_name=args.model_name,
-        weight=weight,
         num_classes=args.num_classes,
+        feature_extract=False,
+        pre_trained=args.pre_trained,
+    )
+
+    lit_model = LitModel(
+        model=model,
         lr=args.lr,
-        pre_trained=args.pre_trained
     )
 
     checkpoint_callback = ModelCheckpoint(

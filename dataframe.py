@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 
 from sklearn.model_selection import train_test_split
 
@@ -31,6 +32,8 @@ class Init_dataframe:
         df_original["duplicates"] = df_original["duplicates"].apply(
             lambda x: "unduplicated" if x in unique_list else "duplicates"
         )
+        
+        df_undup = df_original[df_original['duplicates'] == 'unduplicated']
 
         return df_original, df_undup
     
@@ -50,10 +53,11 @@ class Init_dataframe:
 
         df_train = df_original[df_original['train_or_val'] == 'train']
 
-        data_aug_rate = [15,10,5,50,0,40,5]
+        data_aug_rate = {0: 18, 1: 11, 2: 4, 3: 53, 4: 4, 5: 0, 6: 44}
         for i in range(7):
             if data_aug_rate[i]:
-                rows = pd.DataFrame([df_train.loc[df_train['encoded_dx'] == i,:]]*(data_aug_rate[i]-1))
+                temp = df_train.loc[df_train['encoded_dx'] == i,:]
+                rows = pd.DataFrame(np.repeat(temp.values, data_aug_rate[i], axis=0), columns = temp.columns)
                 df_train= pd.concat([df_train, rows], ignore_index=True)
         
         return df_train
