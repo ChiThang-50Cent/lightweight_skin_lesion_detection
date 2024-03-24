@@ -7,14 +7,15 @@ from torchmetrics import Accuracy
 class LitModel(pl.LightningModule):
     def __init__(
         self,
+        num_classes,
         model: torch.nn.Module,
         lr=1e-3,
     ):
         super().__init__()
         self.save_hyperparameters(ignore=["model"])
         self.model = model
-        self.train_acc = Accuracy(task="multiclass")
-        self.val_acc = Accuracy(task="multiclass")
+        self.train_acc = Accuracy(task="multiclass", num_classes=num_classes)
+        self.val_acc = Accuracy(task="multiclass", num_classes=num_classes)
         self.loss_fn = torch.nn.CrossEntropyLoss()
         self.lr = lr
 
