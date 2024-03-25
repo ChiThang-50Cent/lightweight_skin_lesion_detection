@@ -108,7 +108,7 @@ if __name__ == "__main__":
     confusion_mtx = confusion_matrix(y_label, y_predict)
     plot_labels = ['akiec', 'bcc', 'bkl', 'df','mel', 'nv', 'vasc']
 
-    plot_confusion_matrix(confusion_mtx, path=os.path.join(args.path, f'{args.model_name}.png'), classes=plot_labels)
+    plot_confusion_matrix(confusion_mtx, path=os.path.join(args.eval_path, f'{args.model_name}.png'), classes=plot_labels)
     report = classification_report(y_label, y_predict, target_names=plot_labels, output_dict=True)
 
     print(report)

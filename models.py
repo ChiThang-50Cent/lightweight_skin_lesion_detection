@@ -20,7 +20,13 @@ class Models:
         model = None
 
         if self.model_name == "efficientnet":
-            model = torchvision.models.efficientnet_v2_s(pretrained=self.pre_trained)
+            weight = (
+                None
+                if not self.pre_trained
+                else torchvision.models.EfficientNet_V2_S_Weights
+            )
+
+            model = torchvision.models.efficientnet_v2_s(weight=weight)
             self.set_parameter_requires_grad(model)
             num_ftrs = model.classifier[-1].in_features
             model.classifier[-1] = torch.nn.Linear(num_ftrs, self.num_classes)
@@ -38,7 +44,12 @@ class Models:
             model.classifier[-1] = torch.nn.Linear(num_ftrs, self.num_classes)
 
         elif self.model_name == "shuffernetv2":
-            model = torchvision.models.shufflenet_v2_x2_0(pretrained=self.pre_trained)
+            weight = (
+                None
+                if not self.pre_trained
+                else torchvision.models.ShuffleNet_V2_X2_0_Weights
+            )
+            model = torchvision.models.shufflenet_v2_x2_0(weight=weight)
             self.set_parameter_requires_grad(model)
             num_ftrs = model.fc.in_features
             model.fc = torch.nn.Linear(num_ftrs, self.num_classes)
