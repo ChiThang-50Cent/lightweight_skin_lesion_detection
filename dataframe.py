@@ -5,6 +5,7 @@ from sklearn.model_selection import train_test_split
 
 class Init_dataframe:
     def __init__(self, csv_path) -> None:
+        self.label_dict = {'akiec': 0, 'bcc': 1, 'bkl': 2, 'df': 3, 'mel': 4, 'nv': 5, 'vasc': 6}
         df_original = self.read_csv_and_encode_label(csv_path)
         df_original, df_undup = self.get_undup_df(df_original)
         df_val = self.get_val_df(df_undup)
@@ -13,7 +14,6 @@ class Init_dataframe:
         self.df_train = df_train.reset_index()
         self.df_val = df_val.reset_index()
 
-        self.label_dict = {'akiec': 0, 'bcc': 1, 'bkl': 2, 'df': 3, 'mel': 4, 'nv': 5, 'vasc': 6}
 
     def read_csv_and_encode_label(self, csv_path):
         df_original = pd.read_csv(csv_path)
