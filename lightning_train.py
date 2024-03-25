@@ -28,11 +28,9 @@ class LitModel(pl.LightningModule):
 
         logits = self(x)
         loss = self.loss_fn(logits, y)
-        self.log("train_loss", loss, prog_bar=True, on_step=True)
+        self.log("loss", loss, prog_bar=True, on_step=True)
         acc = self.train_acc(logits, y)
-        self.log("train_acc", acc, prog_bar=True, on_step=True)
-
-        # print(f"train_loss: {loss}, train_acc: {acc}")
+        self.log("acc", acc, prog_bar=True, on_step=True)
 
         return loss
 
