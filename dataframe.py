@@ -13,9 +13,11 @@ class Init_dataframe:
         self.df_train = df_train.reset_index()
         self.df_val = df_val.reset_index()
 
+        self.label_dict = {'akiec': 0, 'bcc': 1, 'bkl': 2, 'df': 3, 'mel': 4, 'nv': 5, 'vasc': 6}
+
     def read_csv_and_encode_label(self, csv_path):
         df_original = pd.read_csv(csv_path)
-        df_original["encoded_dx"] = pd.Categorical(df_original["dx"]).codes
+        df_original["encoded_dx"] = df_original["dx"].map(lambda x: self.label_dict[x])
 
         return df_original
 
