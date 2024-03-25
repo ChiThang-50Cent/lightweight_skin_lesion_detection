@@ -71,8 +71,8 @@ if __name__ == "__main__":
         max_epochs=args.epochs,
         accelerator="auto",
         devices="auto",
-        logger=CSVLogger("./log", name=f"{args.model_name}_logs"),
-        callbacks=[EarlyStopping("val_loss", patience=7), checkpoint_callback],
+        logger=CSVLogger("./log", name=f"{args.model_name}_logs", version=0),
+        callbacks=[checkpoint_callback],
     )
 
     trainer.fit(lit_model, train_loader, val_loader)
