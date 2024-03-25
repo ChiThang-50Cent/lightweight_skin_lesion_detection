@@ -1,9 +1,10 @@
+import os
 import argparse
 
 import torch
 import numpy as np
+import pandas as pd
 import itertools
-import os
 
 from torch.utils.data import DataLoader
 from sklearn.metrics import confusion_matrix, classification_report
@@ -47,6 +48,11 @@ def plot_confusion_matrix(cm, path, classes,
     plt.xlabel('Predicted label')
 
     plt.savefig(path)
+
+def save_classification_report(report, path):
+    df = pd.DataFrame(report).transpose()
+    df.to_csv(path)
+
 
 if __name__ == "__main__":
 
@@ -105,13 +111,15 @@ if __name__ == "__main__":
             y_label.extend(labels.cpu().numpy())
             y_predict.extend(np.squeeze(prediction.cpu().numpy().T))
 
-    confusion_mtx = confusion_matrix(y_label, y_predict)
     plot_labels = ['akiec', 'bcc', 'bkl', 'df','mel', 'nv', 'vasc']
 
-    plot_confusion_matrix(confusion_mtx, path=os.path.join(args.eval_path, f'{args.model_name}.png'), classes=plot_labels)
+    confusion_mtx = confusion_matrix(y_label, y_predict)
     report = classification_report(y_label, y_predict, target_names=plot_labels, output_dict=True)
 
-    print(report)
+    plot_confusion_matrix(confusion_mtx, path=os.path.join(args.eval_path, f'{args.model_name}.png'), classes=plot_labels)
+    save_classification_report(report, path=os.path.join(args.eval_path, f'{args.model_name}.csv'))
+
+    
 
 
 
