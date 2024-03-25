@@ -65,6 +65,8 @@ if __name__ == "__main__":
     parser.add_argument("--img_size", type=int, default=256)
     args = parser.parse_args()
 
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
     df = Init_dataframe(args.csv_file)
 
     val_transform = get_val_transform(args.img_size)
@@ -80,7 +82,7 @@ if __name__ == "__main__":
         pre_trained=False,
     ).get_model()
 
-    checkpoint = torch.load(args.ckpt_path)
+    checkpoint = torch.load(args.ckpt_path, map_location=device)
     model_weights = checkpoint["state_dict"]
 
     for key in list(model_weights):
@@ -88,7 +90,7 @@ if __name__ == "__main__":
         
     model.load_state_dict(model_weights)
 
-    model.to('cuda')
+    model.to(device)
     model.eval()
     y_label = []
     y_predict = []
@@ -96,7 +98,7 @@ if __name__ == "__main__":
     with torch.no_grad():
         for i, data in enumerate(val_loader):
             images, labels = data
-            images = images.to('cuda')
+            images = images.to(device)
             outputs = model(images)
             prediction = outputs.max(1, keepdim=True)[1]
             
