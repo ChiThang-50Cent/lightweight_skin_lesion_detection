@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Skin lesion</title>
+    <style>
+      #video {
+        width: 320px;
+        height: 240px;
+        padding: 3%;
+      }
+      #photo {
+        width: 320px;
+        height: 240px;
+      }
+      #canvas {
+        display: none;
+      }
+      .camera {
+        width: 340px;
+        display: inline-block;
+      }
+      .output {
+        width: 340px;
+        display: inline-block;
+      }
+
+      .contentarea {
+        display: flex;
+        font-size: 16px;
+        font-family: Arial;
+        text-align: center;
+      }
+
+      body {
+        margin: 0;
+        padding: 0;
+        background-color: #111; /* Màu nền tối */
+        color: #fff; /* Màu văn bản trắng */
+        font-family: Arial, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+      }
+
+      .form-container {
+        background-color: #fff; /* Màu nền sáng của biểu mẫu */
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Hiển thị đổ bóng */
+        color: black;
+      }
+
+      .form-container h2 {
+        text-align: center;
+      }
+
+      img {
+        padding: 3%;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div class="form-container">
+      <h2>Skin lesion</h2>
+      <div class="cam" hidden>
+        <div class="contentarea">
+          <div class="camera">
+            <video id="video">Video stream not available.</video>
+          </div>
+          <div><button id="startbutton">Take photo</button></div>
+          <canvas id="canvas"></canvas>
+          <div class="output">
+            <img id="photo" alt="The screen capture will appear in this box." />
+          </div>
+        </div>
+      </div>
+      <form enctype="multipart/form-data" method="POST" id="form">
+        <input name="img" type="file" id="file" /><br />
+        <button id="change_btn">
+          Upload using camera
+        </button>
+        <input type="submit" />
+      </form>
+      <br />
+      <img src="" id="result" />
+      <div>
+        <div>
+          <p>Result: <span id="pred"></span></p>
+        </div>
+      </div>
+    </div>
+  </body>
+  <script>
+    (function () {
+      var width = 320;
+      var height = 0;
+
+      var streaming = false;
+
+      var video = null;
+      var canvas = null;
+      var photo = null;
+      var startbutton = null;
+      var downloadbutton = null;
+
+      let input_hidden = false;
+
+      function startup() {
+        video = document.getElementById("video");
+        canvas = document.getElementById("canvas");
+        photo = document.getElementById("photo");
+        startbutton = document.getElementById("startbutton");
+        downloadbutton = document.getElementById("downloadbutton");
+
+        navigator.mediaDevices
+          .getUserMedia({
+            video: true,
+            audio: false,
+          })
+          .then(function (stream) {
+            video.srcObject = stream;
+            video.play();
+          })
+          .catch(function (err) {
+            console.log("An error occurred: " + err);
+          });
+
+        video.addEventListener(
+          "canplay",
+          function (ev) {
+            if (!streaming) {
+              height = video.videoHeight / (video.videoWidth / width);
+
+              if (isNaN(height)) {
+                height = width / (4 / 3);
+              }
+
+              video.setAttribute("width", width);
+              video.setAttribute("height", height);
+              canvas.setAttribute("width", width);
+              canvas.setAttribute("height", height);
+              streaming = true;
+            }
+          },
+          false
+        );
+
+        startbutton.addEventListener(
+          "click",
+          function (ev) {
+            takepicture();
+            ev.preventDefault();
+          },
+          false
+        );
+
+        downloadbutton.addEventListener("click", function () {
+          downloadPhoto();
+        });
+
+        clearphoto();
+      }
+
+      function clearphoto() {
+        var context = canvas.getContext("2d");
+        context.fillStyle = "#AAA";
+        context.fillRect(0, 0, canvas.width, canvas.height);
+
+        var data = canvas.toDataURL("image/png");
+        photo.setAttribute("src", data);
+      }
+
+      function takepicture() {
+        var context = canvas.getContext("2d");
+        if (width && height) {
+          canvas.width = width;
+          canvas.height = height;
+          context.drawImage(video, 0, 0, width, height);
+
+          var data = canvas.toDataURL("image/png");
+          photo.setAttribute("src", data);
+        } else {
+          clearphoto();
+        }
+      }
+
+      function set_value(src, pred) {
+        let img = document.querySelector("#result");
+        let result = document.querySelector("#pred");
+
+        img.setAttribute("src", src);
+        result.innerHTML = `<strong>${pred}</strong>`;
+      }
+
+      document
+        .querySelector("#change_btn")
+        .addEventListener("click", function (e) {
+          e.preventDefault();
+
+          btn = document.querySelector("#file");
+          btn.hidden = !input_hidden;
+
+          cam = document.querySelector(".cam");
+          cam.hidden = input_hidden;
+
+          input_hidden = !input_hidden;
+
+          startup();
+        });
+
+      document.querySelector("#form").addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        let dataform = null;
+
+        if (!input_hidden) {
+          const form = document.getElementById("form");
+          dataform = new FormData(form);
+          fetch("/", {
+            method: "POST",
+            body: dataform,
+          })
+            .then((res) => res.json())
+            .then((res) => set_value(res.static, res.preds));
+        } else {
+          canvas.toBlob(function (blob) {
+            dataform = new FormData();
+            dataform.append("img", blob, "newfile.jpg");
+
+            fetch("/", {
+              method: "POST",
+              body: dataform,
+            })
+              .then((res) => res.json())
+              .then((res) => set_value(res.static, res.preds));
+          });
+        }
+      });
+    })();
+  </script>
+</html>

@@ -116,8 +116,8 @@ if __name__ == "__main__":
     confusion_mtx = confusion_matrix(y_label, y_predict)
     report = classification_report(y_label, y_predict, target_names=plot_labels, output_dict=True)
 
-    plot_confusion_matrix(confusion_mtx, path=os.path.join(args.eval_path, f'{args.model_name}.png'), classes=plot_labels)
-    save_classification_report(report, path=os.path.join(args.eval_path, f'{args.model_name}.csv'))
+    plot_confusion_matrix(confusion_mtx, path=os.path.join(args.eval_path, f'{args.model_name}_CM.png'), classes=plot_labels)
+    save_classification_report(report, path=os.path.join(args.eval_path, f'{args.model_name}_RP.csv'))
 
     
 

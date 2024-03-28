@@ -7,7 +7,9 @@ from transforms import get_val_transform
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--num_classes", "-n", type=int, help="Number of classes", default=7)
+    parser.add_argument(
+        "--num_classes", "-n", type=int, help="Number of classes", default=7
+    )
     parser.add_argument(
         "--model_name",
         help="Choose model efficientnet, mobilenetv3, shufflenetv2",
@@ -18,7 +20,7 @@ if __name__ == "__main__":
     parser.add_argument("--img_size", type=int, default=256)
     args = parser.parse_args()
 
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     model = Models(
         model_name=args.model_name,
@@ -34,13 +36,15 @@ if __name__ == "__main__":
 
     for key in list(model_weights):
         model_weights[key.replace("model.", "")] = model_weights.pop(key)
-        
+
     model.load_state_dict(model_weights)
 
     model.to(device)
     model.eval()
 
-    images = Image.open(args.img_path)
+    images = Image.open(args.img_path).convert('RGB')
+    # import numpy as np
+    # print(np.array(images).shape)
     images = transform(images)
 
     with torch.no_grad():
@@ -49,4 +53,14 @@ if __name__ == "__main__":
         outputs = model(images)
         prediction = outputs.max(1, keepdim=True)[1]
 
-    print(prediction)
+    label_map = {0: "akiec", 1: "bcc", 2: "bkl", 3: "df", 4: "mel", 5: "nv", 6: "vasc"}
+    detail_map = {
+        "nv": "Melanocytic nevi",
+        "mel": "dermatofibroma",
+        "bkl": "Benign keratosis-like lesions ",
+        "bcc": "Basal cell carcinoma",
+        "akiec": "Actinic keratoses",
+        "vasc": "Vascular lesions",
+        "df": "Dermatofibroma",
+    }
+    print(detail_map[label_map[prediction.item()]])
