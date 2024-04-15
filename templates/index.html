@@ -2,6 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Skin lesion</title>
     <style>
       #video {
@@ -27,6 +28,7 @@
 
       .contentarea {
         display: flex;
+        flex-direction: column;
         font-size: 16px;
         font-family: Arial;
         text-align: center;
@@ -50,6 +52,9 @@
         border-radius: 10px;
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Hiển thị đổ bóng */
         color: black;
+        height: 85vh;
+        overflow-y: scroll;
+        margin: auto;
       }
 
       .form-container h2 {
@@ -80,7 +85,7 @@
       <form enctype="multipart/form-data" method="POST" id="form">
         <input name="img" type="file" id="file" /><br />
         <button id="change_btn">
-          Upload using camera
+          Change input type
         </button>
         <input type="submit" />
       </form>
@@ -117,7 +122,11 @@
 
         navigator.mediaDevices
           .getUserMedia({
-            video: true,
+            video: {
+              facingMode : {
+                exact: "environment"
+              }
+            },
             audio: false,
           })
           .then(function (stream) {
@@ -226,7 +235,8 @@
             .then((res) => res.json())
             .then((res) => set_value(res.static, res.preds));
         } else {
-          canvas.toBlob(function (blob) {
+          let canvas_a = document.getElementById("canvas")
+          canvas_a.toBlob(function (blob) {
             dataform = new FormData();
             dataform.append("img", blob, "newfile.jpg");
 

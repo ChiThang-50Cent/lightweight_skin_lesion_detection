@@ -1,8 +1,9 @@
-Flask==3.0.2
+Flask==3.0.3
 matplotlib==3.8.3
 numpy==1.26.4
-pandas==2.2.1
-Pillow==10.2.0
+pandas==2.2.2
+Pillow==10.3.0
+pyngrok==7.1.6
 pytorch_lightning==2.2.1
 scikit_learn==1.4.1.post1
 torch==2.2.1
