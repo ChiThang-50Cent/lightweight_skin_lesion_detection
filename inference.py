@@ -56,7 +56,7 @@ if __name__ == "__main__":
     label_map = {0: "akiec", 1: "bcc", 2: "bkl", 3: "df", 4: "mel", 5: "nv", 6: "vasc"}
     detail_map = {
         "nv": "Melanocytic nevi",
-        "mel": "melanoma",
+        "mel": "Melanoma",
         "bkl": "Benign keratosis-like lesions ",
         "bcc": "Basal cell carcinoma",
         "akiec": "Actinic keratoses",

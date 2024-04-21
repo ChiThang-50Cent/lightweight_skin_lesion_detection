@@ -4,8 +4,8 @@ from flask import Flask, request, redirect, render_template, jsonify, url_for
 from pyngrok import ngrok
 
 app = Flask(__name__)
-ngrok.set_auth_token("2eMSkiXyH1BTLOoqbFulzS2fj0W_3n36Lj4FfSmFmG7UUS56N")
-public_url =  ngrok.connect(5000).public_url
+# ngrok.set_auth_token("2eMSkiXyH1BTLOoqbFulzS2fj0W_3n36Lj4FfSmFmG7UUS56N")
+# public_url =  ngrok.connect(5000).public_url
 
 @app.get('/')
 def home():
@@ -47,5 +47,5 @@ def get_file():
 	})
 
 if __name__ == "__main__":
-	print(public_url)
+	# print(public_url)
 	app.run(port=5000)

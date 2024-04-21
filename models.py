@@ -43,7 +43,7 @@ class Models:
             num_ftrs = model.classifier[-1].in_features
             model.classifier[-1] = torch.nn.Linear(num_ftrs, self.num_classes)
 
-        elif self.model_name == "shuffernetv2":
+        elif self.model_name == "shufflenetv2":
             weight = (
                 None
                 if not self.pre_trained
@@ -53,6 +53,29 @@ class Models:
             self.set_parameter_requires_grad(model)
             num_ftrs = model.fc.in_features
             model.fc = torch.nn.Linear(num_ftrs, self.num_classes)
+        
+        elif self.model_name == "resnet":
+            weight = (
+                None
+                if not self.pre_trained
+                else torchvision.models.ResNet18_Weights.DEFAULT
+            )
+            model = torchvision.models.resnet18(weights=weight)
+            self.set_parameter_requires_grad(model)
+            num_ftrs = model.fc.in_features
+            model.fc = torch.nn.Linear(num_ftrs, self.num_classes)
+        
+        elif self.model_name == "mnasnet":
+            weight = (
+                None
+                if not self.pre_trained
+                else torchvision.models.MNASNet1_3_Weights.DEFAULT
+            )
+            model = torchvision.models.mnasnet1_3(weights=weight)
+            self.set_parameter_requires_grad(model)
+            num_ftrs = model.classifier[-1].in_features
+            model.classifier[-1] = torch.nn.Linear(num_ftrs, self.num_classes)
+
         else:
             print("Invalid model name, exiting...")
             exit()
