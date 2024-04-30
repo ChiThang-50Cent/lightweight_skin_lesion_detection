@@ -23,55 +23,32 @@ class Models:
             weight = (
                 None
                 if not self.pre_trained
-                else torchvision.models.EfficientNet_B0_Weights
+                else torchvision.models.EfficientNet_V2_S_Weights.DEFAULT
             )
 
-            model = torchvision.models.efficientnet_b0(weights=weight)
+            model = torchvision.models.efficientnet_v2_s(weights=weight)
             self.set_parameter_requires_grad(model)
             num_ftrs = model.classifier[-1].in_features
             model.classifier[-1] = torch.nn.Linear(num_ftrs, self.num_classes)
-
-        elif self.model_name == "mobilenetv3":
-            weight = (
-                None
-                if not self.pre_trained
-                else torchvision.models.MobileNet_V3_Large_Weights
-            )
-
-            model = torchvision.models.mobilenet_v3_large(weights=weight)
-            self.set_parameter_requires_grad(model)
-            num_ftrs = model.classifier[-1].in_features
-            model.classifier[-1] = torch.nn.Linear(num_ftrs, self.num_classes)
-
-        elif self.model_name == "shufflenetv2":
-            weight = (
-                None
-                if not self.pre_trained
-                else torchvision.models.ShuffleNet_V2_X2_0_Weights
-            )
-            model = torchvision.models.shufflenet_v2_x2_0(weights=weight)
-            self.set_parameter_requires_grad(model)
-            num_ftrs = model.fc.in_features
-            model.fc = torch.nn.Linear(num_ftrs, self.num_classes)
         
         elif self.model_name == "resnet":
             weight = (
                 None
                 if not self.pre_trained
-                else torchvision.models.ResNet18_Weights.DEFAULT
+                else torchvision.models.ResNet50_Weights.DEFAULT
             )
-            model = torchvision.models.resnet18(weights=weight)
+            model = torchvision.models.resnet50(weights=weight)
             self.set_parameter_requires_grad(model)
             num_ftrs = model.fc.in_features
             model.fc = torch.nn.Linear(num_ftrs, self.num_classes)
         
-        elif self.model_name == "mnasnet":
+        elif self.model_name == "maxvit":
             weight = (
                 None
                 if not self.pre_trained
-                else torchvision.models.MNASNet1_3_Weights.DEFAULT
+                else torchvision.models.MaxVit_T_Weights.DEFAULT
             )
-            model = torchvision.models.mnasnet1_3(weights=weight)
+            model = torchvision.models.maxvit_t(weights=weight)
             self.set_parameter_requires_grad(model)
             num_ftrs = model.classifier[-1].in_features
             model.classifier[-1] = torch.nn.Linear(num_ftrs, self.num_classes)

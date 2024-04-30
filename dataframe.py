@@ -43,6 +43,9 @@ class Init_dataframe:
         y = df['encoded_dx']
         _, df_val = train_test_split(df, test_size=0.2, random_state=101, stratify=y)
         
+        index = df_val[df_val['dx'] == 'nv'].index[:800]
+        df_val = df_val.drop(index)
+        
         return df_val
     
     def get_train_df(self, df: pd.DataFrame, df_val: pd.DataFrame):
