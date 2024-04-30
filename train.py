@@ -62,8 +62,8 @@ if __name__ == "__main__":
 
     checkpoint_callback = ModelCheckpoint(
         "./saved_model",
-        monitor="val_acc",
-        save_top_k=2,
+        monitor="val_loss",
+        save_top_k=3,
         filename=args.model_name + "_{epoch:02d}_{val_loss:.2f}",
     )
 
