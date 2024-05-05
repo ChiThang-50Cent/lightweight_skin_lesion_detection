@@ -53,6 +53,41 @@ class Models:
             num_ftrs = model.classifier[-1].in_features
             model.classifier[-1] = torch.nn.Linear(num_ftrs, self.num_classes)
 
+        elif self.model_name == "efficientnet_b0":
+            weight = (
+                None
+                if not self.pre_trained
+                else torchvision.models.EfficientNet_B0_Weights.DEFAULT
+            )
+
+            model = torchvision.models.efficientnet_b0(weights=weight)
+            self.set_parameter_requires_grad(model)
+            num_ftrs = model.classifier[-1].in_features
+            model.classifier[-1] = torch.nn.Linear(num_ftrs, self.num_classes)
+
+        elif self.model_name == "mobilenetv3":
+            weight = (
+                None
+                if not self.pre_trained
+                else torchvision.models.MobileNet_V3_Large_Weights.DEFAULT
+            )
+
+            model = torchvision.models.mobilenet_v3_large(weights=weight)
+            self.set_parameter_requires_grad(model)
+            num_ftrs = model.classifier[-1].in_features
+            model.classifier[-1] = torch.nn.Linear(num_ftrs, self.num_classes)
+
+        elif self.model_name == "shuffernetv2":
+            weight = (
+                None
+                if not self.pre_trained
+                else torchvision.models.ShuffleNet_V2_X2_0_Weights.DEFAULT
+            )
+            model = torchvision.models.shufflenet_v2_x2_0(weights=weight)
+            self.set_parameter_requires_grad(model)
+            num_ftrs = model.fc.in_features
+            model.fc = torch.nn.Linear(num_ftrs, self.num_classes)
+
         else:
             print("Invalid model name, exiting...")
             exit()
